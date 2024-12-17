@@ -22,7 +22,9 @@
 														<option selected value="">Все</option>
 														<?php
 														foreach ($clients as $c) {
-															echo '<option value="'.$c["id"].'">' . $c["name"] . " - " . get_order_by_client($c["id"], date('Y'))['order_num'] . '</option>';
+															// echo '<option value="'.$c["id"].'">' . $c["name"] . " - " . get_order_by_client($c["id"], date('Y'))['order_num'] . '</option>';
+															// Фикс - убрали номер заказа из-за вложенности запросов к БД
+															echo '<option value="'.$c["id"].'">' . $c["name"] . '</option>';
 														}
 														?>
 													</select>
@@ -256,19 +258,19 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-<?php
-$tag1 = microtime(true) - $start;
-echo <<<JAVASCRIPT
-<script>
-    console.log("Начало цикла: " + {$tag1});
-</script>
-JAVASCRIPT;
-?>
-													<?php foreach ($forms as $f) {
-														$order = get_order($f['order_id']);
-														$client = findInNestedArray($clients, "id", $client["id"]);
-														$user = get_user($f['spec_id']);
+											
+													<?php
+	                                    				// Определяем переменные для цикла
+														$tariff = getSpecialistTariff($order['specialists']);
+														$vacations_array = get_setting('vacations_' . date('Y'));
+													?>
+													<?php foreach ($forms as $f):
+
+														$order = findInNestedArray($orders, "id", $f['order_id']);
+														$client = findInNestedArray($clients, "id", $f['client_id']);
+														$user = findInNestedArray($users, 'id', $f['spec_id']);
 														$year = date_format(date_create($order['order_date']), 'Y');
+
 														// Выводим, только если форма была подписана
 														if ($f['accepted']) {
 														?>
@@ -290,37 +292,50 @@ JAVASCRIPT;
 																	});
 																</script>
 															</td>
-                                                            
-															
+<?  $tag = microtime(true) - $start;
+echo <<<JAVASCRIPT
+<script>
+	console.log("==========================")
+	console.log("Метка 1: " + {$tag});
+</script>
+JAVASCRIPT;?>
 															<td><?php echo $user['name']; ?></td>
                                                             <td><?php echo $client['iin']; ?></td>
                                                             <td><?php if ($order['order_status'] == 1) {echo '<span class="fa fa-circle" style="color:green;"></span> Активен';} else {echo '<span class="fa fa-circle" style="color:red;"></span> Отменен';} ?></td>
                                                             <td><?php echo $client['phone']; ?></td>
                                                             <td><?php echo $order['address']; ?></td>
-                                                            <td><?php 
+                                                            <td>
+																<?php 
 																// Остаток часов на период
 																$begin_hours_for_month = floatval($order['begin_hours'] - count_hours_for_month($f['client_id'],$year,$f['month']));
-																echo $begin_hours_for_month; ?></td>
+																echo $begin_hours_for_month; ?>
+															</td>
                                                             <?php
-																$ls = get_vacations($f['month'], $year);
+																$ls = get_vacations($f['month'], $year, ($year == date('Y')) ? $vacations_array : null);
 																foreach (range(1,31) as $i) {
 																	foreach ($ls as &$l) {
 																		if ($i == $l) {
-																			echo '<td class="text-center cell-dark" style="'.get_online_status_as_style($f['id'],$i).'"><div class="'.get_online_status_as_div_class($f['id'],$i).'">'.$f[$i].'</div></td>';
+																			echo '<td class="text-center cell-dark" style="'.get_online_status_as_style($f['id'],$i, $f).'"><div class="'.get_online_status_as_div_class($f['id'],$i).'">'.$f[$i].'</div></td>';
 																			break;
 																		} else {
 																			if ($l == $ls[count($ls)-1]) {
-																				echo '<td class="text-center" style="'.get_online_status_as_style($f['id'],$i).'"><div class="'.get_online_status_as_div_class($f['id'],$i).'">'.$f[$i].'</div></td>';
+																				echo '<td class="text-center" style="'.get_online_status_as_style($f['id'],$i, $f).'"><div class="'.get_online_status_as_div_class($f['id'],$i).'">'.$f[$i].'</div></td>';
 																			}
 																		}
 																	}
 																}
 															?>
+															<?  $tag = microtime(true) - $start;
+echo <<<JAVASCRIPT
+<script>
+	console.log("==========================")
+	console.log("Метка 2: " + {$tag});
+</script>
+JAVASCRIPT;?>
                                                             <td><?php $total = 0.0; foreach (range(1,31) as $d) {$total += $f[$d];} echo $total; ?></td>
-                                                            <td><?php echo intval($total*getSpecialistTariff($order['specialists'])).' тг.'; ?></td>
+                                                            <td><?php echo intval($total*$tariff).' тг.'; ?></td>
                                                             <td><?php echo $begin_hours_for_month-$total; ?></td>
-                                                            <td><?php echo get_gu($order['gu_id'])['name']; ?></td>
-                                                            <td><?php echo get_psu($order['psu_id'])['name']; ?></td>
+                                                            <td><?php echo findInNestedArray($gu_ids, "id", $order['gu_id'])["name"]; ?></td>
                                                             <td><?php if ($order['cancel_date'] != '0000-00-00' && $order['cancel_date'] != null) {echo $order['cancel_date'];} else {echo '----';} ?></td>
                                                             <td><?php if ($order['cancel_date'] != '0000-00-00' && $order['cancel_date'] != null) {echo $order['cancel_reason'];} else {echo '----';} ?></td>
                                                             <td id="comments_<?php echo $f['id'];?>"><?php echo $f['comment'];?></td>
@@ -349,7 +364,6 @@ HTML;
 																		<option value="{$index}">{$t}</option>
 HTML;
 																	}
-																	
 																	$error_modal_content .= <<<HTML
 																		</select>
 																		<label>Комментарий</label>
@@ -380,7 +394,7 @@ HTML;
 															</td>
                                                         </tr>
 													<?php }
-													} ?>
+													endforeach; ?>
                                                     </tbody>
                                                 </table>
 												

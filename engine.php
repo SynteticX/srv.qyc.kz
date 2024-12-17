@@ -279,13 +279,25 @@ function count_hours($client_id, $year) {
 	}
 	return $result;
 }
-//Выдаем выходные по месяцу массивом дней
-function get_vacations($month, $year) {
-	//Получаем настройку
-	$month = intval($month-1);
-	$vacations = get_setting('vacations_' . $year);
-	$vacations = explode(':', $vacations);
-	return explode(',', $vacations[$month]);
+/** Выдаем выходные по месяцу массивом дней
+ * @param mixed $month
+ * @param mixed $year
+ * @param mixed $array Вводим уже подгруженный массив со списком выходных
+**/
+function get_vacations($month, $year, $array = null) {
+	if (!$array) {
+		//Получаем настройку
+		$month = intval($month-1);
+		$vacations = get_setting('vacations_' . $year);
+		$vacations = explode(':', $vacations);
+		return explode(',', $vacations[$month]);
+	} else {
+		//Получаем настройку
+		$month = intval($month-1);
+		$vacations = $array;
+		$vacations = explode(':', $vacations);
+		return explode(',', $vacations[$month]);
+	}
 }
 //Проверяем является ли день выходным, выходные на месяц должны подаваться массивом из дней
 function is_vacation($vacations_array_for_month, $month_day) {
@@ -297,16 +309,23 @@ function is_vacation($vacations_array_for_month, $month_day) {
 	return false;
 }
 //Получаем статус онлайн-оффлайн
-function get_online_status($form_id, $day) {
-	$form = get_form($form_id);
+function get_online_status($form_id, $day, $form = null) {
+	if (!$form) {$form = get_form($form_id);}
 	if ($form[$day] != null) {
 		return $form['online_'.$day];
 	}
 	return 'No hours';
 }
-//Получаем стиль для статуса онлайн-оффлайн
-function get_online_status_as_style($form_id, $day) {
-	$status = get_online_status($form_id, $day);
+/** Получаем стиль для статуса онлайн-оффлайн
+ * @param $form Если подаем третий параметр $form, сильно ускоряется время обработки!
+ * 
+ **/
+function get_online_status_as_style($form_id, $day, $form = null) {
+	if ($form) {
+		$status = get_online_status($form_id, $day, $form);
+	} else {
+		$status = get_online_status($form_id, $day);
+	}
 	if ($status == 1) {
 		return 'color:orange';
 	} else {
@@ -564,7 +583,7 @@ function get_previous_period() {
 }
 
 // Получить количество сданных часов переводчиком в день
-function hours_per_day($spec_id, $date) {
+function hours_per_day($spec_id, $date, $forms = null) {
 	$day = date_format(date_create($date),'d');
 	$month = date_format(date_create($date),'m');
 	$year = date_format(date_create($date),'Y');
@@ -576,7 +595,9 @@ function hours_per_day($spec_id, $date) {
 		"year" => $year,
 		"month" => $month,
 	];
-	$forms = get_forms_by_params($params);
+	if (!$forms) {
+		$forms = get_forms_by_params($params);
+	}
 	$hours = 0;
 	foreach ($forms as $f) {
 		$hours += $f[intval($day)];
@@ -584,19 +605,23 @@ function hours_per_day($spec_id, $date) {
 	return $hours;
 }
 //Получить часы специалиста за конкретный день у клиента
-function get_hours_in_day_by_client_form($spec_id, $date, $client_id) {
+function get_hours_in_day_by_client_form($spec_id, $date, $client_id, $form = null) {
 	$day = date_format(date_create($date),'d');
 	$month = date_format(date_create($date),'m');
 	$year = date_format(date_create($date),'Y');
-	$params = [
-		"client_id" => $client_id,
-		"spec_id" => $spec_id,
-		"gu_id" => "",
-		"psu_id" => "",
-		"year" => $year,
-		"month" => $month,
-	];
-	$forms = get_forms_by_params($params);
+	if (!$form) {
+		$params = [
+			"client_id" => $client_id,
+			"spec_id" => $spec_id,
+			"gu_id" => "",
+			"psu_id" => "",
+			"year" => $year,
+			"month" => $month,
+		];
+		$forms = get_forms_by_params($params);
+	} else {
+		$forms = [$form];
+	}
 	$hours = 0;
 	foreach ($forms as $f) {
 		$hours += $f[intval($day)];
@@ -604,9 +629,9 @@ function get_hours_in_day_by_client_form($spec_id, $date, $client_id) {
 	return $hours;
 }
 // Достигнут ли лимит часов на день
-function is_spec_day_limit_reached($spec_id, $date, $client_id, $add_hours) {
+function is_spec_day_limit_reached($spec_id, $date, $client_id, $add_hours, $form = null) {
 	$hours = hours_per_day($spec_id, $date);
-	$current_hours = get_hours_in_day_by_client_form($spec_id, $date, $client_id);
+	$current_hours = get_hours_in_day_by_client_form($spec_id, $date, $client_id, $form);
 	if ($hours - $current_hours + $add_hours > 8) {
 		alert("Количество часов на день было превышено. Вы не можете работать больше 8 часов в день!", $_SERVER['REQUEST_URI']);
 	} else {
@@ -656,7 +681,6 @@ function get_cell_color_script() {
 		// Отображение цвета ячеек в зависимости от чекбоксов
 		async function set_cell_color(cell, form) {
 			setTimeout(() => {
-				console.log(form);
 				// Если выбран только первый чекбокс
 				if (form.checkbox1 == 'on' && (form.checkbox2 == 'off' || form.checkbox2 == 'undefined')) {
 					cell.css({

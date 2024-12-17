@@ -44,6 +44,10 @@ function prepare_form_params($client_id, $spec_id, $date) {
                                 </tr>
                             </thead>
                             <tbody>
+                                <? 
+                                    // Определяем переменные
+                                    $tariff = getSpecialistTariff($_SESSION["id"]);
+                                ?>
                                 <?php foreach ($spec_clients as $u): ?>
                                     <?php
                                     $params = prepare_form_params($u['id'], $_SESSION["id"], get_period($current_date, $u['id']));
@@ -59,7 +63,7 @@ function prepare_form_params($client_id, $spec_id, $date) {
 
                                     if (!($order['cancel_date'] && $order['cancel_date'] !== '0000-00-00')):
                                         $user_hours = count_hours_by_form($form_data);
-                                        $salary = $user_hours * getSpecialistTariff($_SESSION["id"]);
+                                        $salary = $user_hours * $tariff;
                                         $total_hours += $user_hours;
                                         $total_salary += $salary;
                                         $remaining_hours_total += $remaining_hours;

@@ -18,6 +18,7 @@ require "engine.php";
 $users = get_all_from_table('users');
 // Получаем всех клиентов
 $clients = get_all_from_table('clients');
+$orders = get_all_from_table('orders');
 // Получаем ГУ
 $gu_ids = get_all_from_table('gu_ids');
 // Получаем ПСУ

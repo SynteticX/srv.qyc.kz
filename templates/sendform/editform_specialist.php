@@ -1,7 +1,6 @@
 <?php
 require_once "config.php";
 require "engine.php";
-$users = get_all_from_table('users');
 // Define variables and initialize with empty values
 $client_id = $_GET['editform'];
 $client_order = get_order_by_client($client_id,date('Y'));
@@ -20,8 +19,15 @@ $year = date_format(date_create($startPeriod),'Y');
 $remaining_hours = remaining_hours($_GET['editform'], $year);
 
 // Проверяем, есть ли уже форма на этот месяц
-$forms = get_forms_by_order($client_order['id']);
-$form = 0;
+$params = [
+	"client_id" => "",
+	"spec_id" => $spec_id,
+	"gu_id" => "",
+	"psu_id" => "",
+	"year" => $year,
+	"month" => $month,
+];
+$forms = get_forms_by_params($params);
 if ($forms != 0) {
     foreach ($forms as $f) {
         if ($f['spec_id'] == $_SESSION['id'] && $f['month'] == $month) {
@@ -30,7 +36,6 @@ if ($forms != 0) {
         }
     }
 }
-
 
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -69,7 +74,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $day = date_format(date_create($input_day), 'd');
         $month = date_format(date_create($input_day), 'm');
     }
-    if (is_order_active($order_id) == 2) {
+    if ($client_order["order_status"] == 2) {
         alert('Заказ на этого клиента был отменен!', 'forms.php');
     }
     // if ($_POST['create_new_form'] == 1) {
@@ -103,7 +108,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // Close statement
             mysqli_stmt_close($stmt);
         }
-    } else if (is_spec_day_limit_reached($spec_id, $input_day, $client_id, $hours) == 0) {
+    } else if (is_spec_day_limit_reached($spec_id, $input_day, $client_id, $hours, $form) == 0) {
         //Если форма на месяц была создана
         $sql = "UPDATE forms SET `".intval($day)."`=?, `online_".intval($day)."`=? WHERE id = ".intval($form['id']);
         echo $sql;
@@ -219,12 +224,11 @@ include('templates/header.php');
 																				<?php } ?>
 																			</td>
 																			<?php } ?>
-																			<td class="p-2"><?php if (get_online_status($f['id'], $d) == 1 and floatval($f[$d]) > 0){echo 'Онлайн';} else if (get_online_status($f['id'], $d) == 2 and floatval($f[$d]) > 0) {echo 'Очно';}?></td>
-																			<td class="p-2"><?php echo hours_per_day($_SESSION["id"], date_format(date_create($d.'-'.$month.'-'.$year),'Y-m-d')); ?> ч.</td>
+																			<td class="p-2"><?php if (get_online_status($f['id'], $d, $f) == 1 and floatval($f[$d]) > 0){echo 'Онлайн';} else if (get_online_status($f['id'], $d, $f) == 2 and floatval($f[$d]) > 0) {echo 'Очно';}?></td>
+																			<td class="p-2"><?php echo hours_per_day($_SESSION["id"], date_format(date_create($d.'-'.$month.'-'.$year),'Y-m-d'), $forms); ?> ч.</td>
 																			<td class="p-2"></td>
 																		</form>
 																		</tr>
-																		
 																		<?php } ?>
 																</tbody>
 															</table>
@@ -395,6 +399,7 @@ include('templates/header.php');
         <!-- END layout-wrapper -->
         <!-- Right bar overlay-->
         <div class="rightbar-overlay"></div>
+		
 <?php
 include('templates/footer.html');
 ?>
