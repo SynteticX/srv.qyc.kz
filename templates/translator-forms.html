@@ -1,0 +1,195 @@
+{% extends 'main.html' %}
+
+{% block header %}
+	{% block title %}QYC | Отчеты{% endblock %}
+{% endblock %}
+
+{% block content %}
+
+            <!-- ============================================================== -->
+            <!-- Start right Content here -->
+            <!-- ============================================================== -->
+            <div class="main-content">
+
+                <div class="page-content">
+                    <div class="container-fluid">
+
+                        <!-- start page title -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                                    <h4 class="mb-sm-0">Мои отчеты</h4>
+                                    <button form="dateform" name="button_id" type="button" class="btn btn-outline-info btn-sm edit" title="Edit" data-bs-toggle="modal" data-bs-target=".bs-send-hours" >
+                                        <i class="fas fa-plus"></i> Отправить форму
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end page title -->
+                       <!--<div class="row">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="w-100">
+                                            <div class="hstack gap-3 d-flex">
+                                                <input class="form-control me-auto" type="text" placeholder="Search by topic..." >
+                                                <input class="form-control me-auto" type="text" placeholder="Search by students..." >
+                                                <button type="button" class="btn btn-secondary"><i class="fas fa-search"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>-->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">              
+                                        <div class="table-rep-plugin">
+                                            <div class="table-wrapper">
+                                            	<div class="table-responsive mb-0 fixed-solution" data-pattern="priority-columns">
+                                                <table id="tech-companies-1" class="table table-striped">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Номер заказа</th>
+                                                        <th>Дата заказа</th>
+                                                        <th>Специалист</th>
+                                                        <th>Клиент</th>
+                                                        <th>Остаток часов</th>
+                                                        {% for i in range(1,32) %}
+                                                            {% set list = [1,2,3,7,8,14,15,21,22,28,29] %}
+                                                            {% for l in list %}
+                                                                {% if i == l %}
+                                                                    <th class="table-dark">{{i}}</th>
+                                                                {% break %}
+                                                                {% else %}
+                                                                    {% if l == list | last %}
+                                                                        <th>{{i}}</th>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endfor %}
+                                                        <th>Итого</th>
+                                                        <th>Остаток</th>
+                                                        <th>Сумма зарплаты</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+													{% set id = namespace(value=1) %}
+
+                                                    {% for result in results %}
+                                                        {% if result[2] == current_user.id %}
+                                                            <tr>
+                                                                <td>{{ id.value }}</td>
+                                                                <td>{{ result[0] }}</td>
+                                                                <td>{{ users[result[3]-1].reg_date }}</td>
+                                                                <td>{{ users[result[2]-1].name }}</td>
+                                                                <td>{{ users[result[3]-1].name }}</td>
+                                                                {% set balance = namespace(value=60.0) %}
+                                                                <td>{{balance.value}}</td>
+                                                                {% set d = day[result[0]-1]  %}
+                                                                {% set total = namespace(value=0.0) %}
+                                                                {% for i in range(1,32) %}
+                                                                    {% if result[4][i] %}
+                                                                        <td>{{result[4][i]}}</td>
+                                                                        {% set total.value = total.value | float + result[4][i] | float %}
+                                                                    {% else %}
+                                                                        <td></td>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                <td>{{ total.value }}</td>
+    <!--                                                            <td>{{ balance.value - total.value }}</td>-->
+                                                            </tr>
+                                                            {% set id.value = id.value + 1 %}
+                                                        {% endif %}
+													{% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div></div>
+        
+                                        </div>
+        
+                                    </div>
+                                </div>
+                            </div> <!-- end col -->
+                        </div>
+
+                        <div id="modal_date" class="modal fade bs-send-hours" tabindex="-1" aria-labelledby="mySmallModalLabel" style="display: none;" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Отправка формы</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="/query" method="get" id="hours" class="custom-validation" novalidate="">
+                                            <div class="mb-3">
+                                                <label class="form-label">Специалист</label>
+                                                <div>
+                                                    <select disabled class="form-select" aria-label="Выберите специалиста">
+                                                      <option selected>{{ users[current_user.id-1].name }}</option>
+                                                    </select>
+                                                    <input type="text" name="adminsendform" id="adminsendform" value="{{current_user.id}}" hidden class="form-control" required="">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Клиент</label>
+                                                <div>
+                                                    <select name="client" id="client" class="form-select" aria-label="Выберите клиента">
+                                                    <option value="0" selected>Выберите клиента</option>
+                                                    {% for client in clients if client.specialist == current_user.id %}
+                                                    <option value="{{client.id}}">{{client.name}}</option>
+                                                    {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Date</label>
+                                                <div>
+                                                    <input type="date" name="date" id="date" max="{{max_date}}" min="{{min_date}}" class="form-control" required="">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Укажите количество часов</label>
+                                                <div>
+                                                    <select name="hour" id="hour" class="form-select" aria-label="Укажите часы">
+                                                      <option value=0.5 selected>0.5</option>
+                                                      {% for h in range(4,34,2) %}
+                                                      <option value={{ h/4 }}>{{ h/4 }}</option>
+                                                      {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <p><label class="form-label">Выберите вид услуги</label></p>
+
+                                                <input type="radio" value="0" class="btn-check " name="online" id="option1" autocomplete="off" checked>
+                                                <label class="btn btn-info" for="option1">Онлайн</label>
+
+                                                <input type="radio" value="1" class="btn-check " name="online" id="option2" autocomplete="off">
+                                                <label class="btn btn-info" for="option2">Оффлайн</label>
+                                            </div>
+                                            <div>
+                                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                    <button type="submit" class="btn btn-primary waves-effect waves-light me-1">
+                                                        Продолжить
+                                                    </button>
+                                                    <button type="reset" class="btn btn-secondary waves-effect">
+                                                        Отмена
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div><!-- /.modal-content -->
+                            </div><!-- /.modal-dialog -->
+                        </div>
+                    </div> <!-- container-fluid -->
+                </div>
+                <!-- End Page-content -->
+                
+            </div>
+            <!-- end main content-->
+
+{% endblock %}

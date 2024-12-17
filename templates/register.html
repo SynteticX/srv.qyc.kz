@@ -1,0 +1,81 @@
+{% extends 'main.html' %}
+
+{% block header %}
+	{% block title %}QYC | Регистрация{% endblock %}
+{% endblock %}
+
+{% block content %}
+	{% block top %}{% endblock %}
+	{% block sidebar %}{% endblock %}
+	<body class="bg-pattern">
+		<div class="bg-overlay"></div><br><br>
+		<div class="account-pages my-5 pt-5">
+			<div class="container">
+				<div class="row justify-content-center">
+					<div class="col-xl-4 col-lg-6 col-md-8">
+						<div class="card">
+							<div class="card-body p-4">
+								<div class="">
+									<div class="text-center">
+										<a href="index.html" class="">
+											<img src="{{ url_for('static', filename='images/logo-dark.png') }}" alt="" height="24" class="auth-logo logo-dark mx-auto">
+										</a>
+									</div>
+									<!-- end row -->
+									<h4 class="font-size-18 text-muted mt-2 text-center">Регистрация</h4>
+								   <br><br>
+									<form class="form-horizontal" method="post">
+										<div class="row">
+										  <div class="col-md-12">
+											<div class="mb-4">
+											  <label class="form-label" for="login">Логин</label>
+											  <input type="text" class="form-control" name="login" id="login" placeholder="Введите имя пользователя" required="required"/>
+											</div>
+											<div class="mb-4">
+											  <label class="form-label" for="password">Пароль</label>
+											  <input type="password" name="password" id="password" class="form-control" required="required" placeholder="Введите пароль"/>
+											</div>
+											<div class="mb-4">
+											  <label class="form-label" for="cpassword">Подтвердите пароль</label>
+											  <input type="password" name="cpassword" id="cpassword" class="form-control" required="required" placeholder="Подтвердите ваш пароль"/>
+											</div>
+											<div class="mb-4">
+											  <label class="form-label" for="email">E-mail</label>
+											  <input type="email" name="email" id="email" class="form-control" required="required" placeholder="Например name@gmail.com"/>
+											</div>
+											<div class="mb-4">
+											  <label class="form-label" for="name">Ваше ФИО</label>
+											  <input type="text" class="form-control" name="name" required="required" placeholder="Введите ФИО"/>
+											</div>
+										  	{% if current_user.group == 2 %}
+											<div class="mb-4">
+											  <label class="form-label" for="group">Переводчик или глухой?</label>
+											  <select id="group" name="group" required="required">
+												  <option value="0">Глухой</option>
+												  <option value="1">Переводчик</option>
+												</select>
+											</div>
+										  	{% endif %}
+											<div class="mb-4">
+											  <button class="btn btn-primary waves-effect waves-light" type="submit">Подтвердить</button>
+											</div>
+										  </div>
+										</div>
+									  </div>
+									</form>
+								</div>
+							</div>
+						</div>
+						<div class="mt-5 text-center">
+							<p class="text-white-50">Уже зарегистрированы? <a href="/login" class="fw-medium text-primary"> Войти </a> </p>
+							
+						</div>
+					</div>
+				</div>
+				<!-- end row -->
+			</div>
+		</div>
+		<!-- end Account pages -->
+
+	</body>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'main.html' %}
+
+{% block header %}
+	{% block title %}QYC | Панель управления{% endblock %}
+{% endblock %}
+{% block inner_sidebar %}
+<li>
+    <a href="/" class="waves-effect">
+        <i class="mdi mdi-home-variant-outline"></i>
+        <span>Панель управления</span>
+    </a>
+</li>
+<li>
+    <a href="/users" class="waves-effect">
+        <i class="mdi mdi-account-edit"></i>
+        <span>Пользователи</span>
+    </a>
+</li>
+<li>
+    <a href="/forms" class="waves-effect">
+        <i class="mdi mdi-email"></i>
+        <span>Отчеты</span>
+    </a>
+</li>
+{% endblock inner_sidebar %}
+
+{% block content %}
+
+            <!-- ============================================================== -->
+            <!-- Start right Content here -->
+            <!-- ============================================================== -->
+            <div class="main-content">
+                <div class="page-content">
+                    <div class="container-fluid">
+
+                        <!-- start page title -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                                    <h4 class="mb-sm-0">Отправка формы за специалиста {{ users[selected_specialist-1].name }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- start page title -->
+                        <div class="row d-flex justify-content-center">
+                            <div class="col-4">
+                                <form action="/query" method="get" id="hours" class="custom-validation" novalidate="">
+                                    <div class="mb-3">
+                                        <label class="form-label">Специалист</label>
+                                        <div>
+                                            <select disabled class="form-select" aria-label="Выберите специалиста">
+                                              <option selected>{{ users[selected_specialist-1].name }}</option>
+                                            </select>
+                                            <input type="text" name="adminsendform" id="adminsendform" value="{{selected_specialist}}" hidden class="form-control" required="">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Клиент</label>
+                                        <div>
+                                            <select name="client" id="client" class="form-select" aria-label="Выберите клиента">
+                                            <option value="0" selected>Выберите клиента</option>
+                                            {% for client in clients if client.specialist == selected_specialist %}
+                                            <option value="{{client.id}}">{{client.name}}</option>
+                                            {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Date</label>
+                                        <div>
+                                            <input type="date" name="date" id="date" max="{{max_date}}" min="{{min_date}}" class="form-control" required="">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Укажите количество часов</label>
+                                        <div>
+                                            <select name="hour" id="hour" class="form-select" aria-label="Укажите часы">
+                                              <option value=0.5 selected>0.5</option>
+                                              {% for h in range(4,34,2) %}
+                                              <option value={{ h/4 }}>{{ h/4 }}</option>
+                                              {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <p><label class="form-label">Выберите вид услуги</label></p>
+
+                                        <input type="radio" value="0" class="btn-check " name="online" id="option1" autocomplete="off" checked>
+                                        <label class="btn btn-info" for="option1">Онлайн</label>
+
+                                        <input type="radio" value="1" class="btn-check " name="online" id="option2" autocomplete="off">
+                                        <label class="btn btn-info" for="option2">Оффлайн</label>
+                                    </div>
+                                    <div>
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <button type="submit" class="btn btn-primary waves-effect waves-light me-1">
+                                                Продолжить
+                                            </button>
+                                            <button type="reset" class="btn btn-secondary waves-effect">
+                                                Отмена
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div> <!-- container-fluid -->
+                </div>
+                <!-- End Page-content -->
+            </div>
+            <!-- end main content-->
+
+{% endblock %}

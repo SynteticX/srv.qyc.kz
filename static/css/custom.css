@@ -1,0 +1,60 @@
+@media (max-width: 860px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+/* Admin elements */
+.elements {}
+
+@media (max-width: 860px) {
+    .elements {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .elements > form {
+        width: 100%;
+    }
+}
+
+.bg-qyc {
+	background: #c6c6c6!important;
+}
+.td-div-online {
+	width: auto;
+    height: auto;
+    padding: 5px;
+    min-width: 40px;
+    min-height: 30px;
+    border-radius: 50%;
+    background-color: orange;
+    text-align: center;
+    line-height: 30px;
+    color: white;
+}
+.td-div-offline {
+	width: auto;
+    height: auto;
+    padding: 5px;
+    min-width: 40px;
+    min-height: 30px;
+    border-radius: 50%;
+    background-color: #555d66;
+    text-align: center;
+    line-height: 30px;
+    color: white;
+}
+.loading {
+	margin: 400px auto;
+}
+.loading-body {
+	width: 100px!important;
+	height: 100px;
+}
+
+/* SELECT 2 */
+.select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    margin-left: 20px;
+}
